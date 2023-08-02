@@ -188,7 +188,7 @@ string checkBrackets(string term) {
     return term;
 }
 
-string replaceBracket(string term) {
+string calcBracket(string term) {
     map<stringSizeType,stringSizeType> bracketPair{}; // stores every pair of brackets
     vector<stringSizeType> openedBrackets{}; // total opened brackets
     vector<stringSizeType> closedBrackets{}; // total closed brackets
@@ -208,14 +208,27 @@ string replaceBracket(string term) {
     stringSizeType startIndex = openedBrackets[openedBrackets.size()-1];
     stringSizeType endIndex = bracketPair[startIndex];
     stringSizeType delta = endIndex-startIndex-1;
-    string centerBracket = evalStep(term.substr(startIndex+1,delta),1);
-    return (term.substr(0,startIndex)+centerBracket+term.substr(endIndex+1));
+
+    string centerBracket = term.substr(startIndex+1,delta);
+    string evalCenterBracket = "";
+    stringSizeType lastComma = 0;
+    for(stringSizeType i = 0; i < centerBracket.size(); i++) {
+        if(centerBracket[i] == ',') {
+            evalCenterBracket += evalStep(centerBracket.substr(lastComma, i-1-lastComma), 1) + ",";
+            lastComma = i+1;
+        }
+    }
+    if(evalCenterBracket.empty()) {
+        evalCenterBracket = evalStep(centerBracket,1);
+    }
+
+    return (term.substr(0,startIndex)+evalCenterBracket+term.substr(endIndex+1));
 }
 
 string evalBracketStep(string term) {
     int i = 0;
     while(term.find('(') != string::npos || term.find(')') != string::npos) {
-        term = replaceBracket(term);
+        term = calcBracket(term);
         i++;
         if(i == 1000) { break; }
     }
@@ -225,18 +238,21 @@ string evalBracketStep(string term) {
 
 string calcMathFunction(string term, string mathFunction) {
     string ans = term;
-    vector<string> params = {};
+    ostringstream strs; // for conversion
+    vector<double> params = {};
     stringSizeType newParamIndex = 0;
 
-    for(stringSizeType i = 0; term.size(); i++) {
-        if(term[i] == ',') {
-            params.push_back(term.substr(newParamIndex, i-1-newParamIndex));
-            newParamIndex = i+1;
+    if(term.size() > 1) {
+        for(stringSizeType i = 0; i < term.size(); i++) {
+            if(term[i] == ',') {
+                params.push_back(stod(term.substr(newParamIndex, i-1-newParamIndex)));
+                newParamIndex = i+1;
+            }
         }
     }
 
-    if(params.size() == 0) {
-        params.push_back(term);
+    if(params.empty()) {
+        params.push_back(stod(term));
     }
 
     if(mathFunction == "pow") {
@@ -245,7 +261,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        ans = pow(stod(params[0]), stod(params[1]));
+        strs << pow(params[0], params[1]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "exp") {
         if(params.size() != 1) {
@@ -253,7 +270,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        ans = exp(stod(params[0]));
+        strs << exp(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "log") {
         if(params.size() != 2) {
@@ -261,7 +279,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        ans = log(stod(params[0]), stod(params[1]));
+        strs << log(params[1]) / log(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "ln") {
         if(params.size() != 1) {
@@ -269,7 +288,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        ans = log(stod(params[0]));
+        strs << log(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "sin") {
         if(params.size() != 1) {
@@ -277,7 +297,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        ans = sin(stod(params[0]));
+        strs << sin(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "cos") {
         if(params.size() != 1) {
@@ -285,7 +306,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        ans = cos(stod(params[0]));
+        strs << cos(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "tan") {
         if(params.size() != 1) {
@@ -293,7 +315,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        ans = tan(stod(params[0]));
+        strs << tan(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "arcsin") {
         if(params.size() != 1) {
@@ -301,7 +324,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        ans = asin(stod(params[0]));
+        strs << asin(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "arccos") {
         if(params.size() != 1) {
@@ -309,14 +333,16 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        ans = acos(stod(params[0]));
+        strs << acos(params[0]);
+        ans = strs.str();
         return ans;
     } else if(mathFunction == "arctan") {
         if(params.size() != 1) {
             cout << "Invalid amout of parameters! (1 needed)" << endl;
             return "0";
         }
-        ans = atan(stod(params[0]));
+        strs << atan(params[0]);
+        ans = strs.str();
         return ans;
     } else {
         cout << "Error: Mathematical function \"" << mathFunction << "\" is invalid!" << endl; 
@@ -324,31 +350,87 @@ string calcMathFunction(string term, string mathFunction) {
     }
 }
 
-string evalMathFunctionStep(string term) {
-    stringSizeType startIndex;
-    stringSizeType endIndex;
-    string mathFunction;
+string evalMathFunctions(string term) {
+    string bracketContent;
+    string bracketResult;
     for(stringSizeType i = 0; i < term.size(); i++) {
-        if(isPartOfMathFunction(term[i])) {
-            for(stringSizeType j = i; j < term.size(); j++) {
+        if(term[i] == ')') {
+            stringSizeType endIndex = i;
+            for(stringSizeType j = i; j >= 0; j--) {
                 if(term[j] == '(') {
-                    startIndex = j;
-                } else if(term[j] == ')') {
-                    endIndex = j;
-                    mathFunction = term.substr(startIndex, startIndex-endIndex);
+                    stringSizeType startIndex = j;
+                    if(j != 0 && isPartOfMathFunction(term[j-1])) {
+                        for(stringSizeType k = j-1; k >= 0; k--) {
+                            cout << "Test: k = " << k << endl;
+                            if(!isPartOfMathFunction(term[k])) {
+                                string mathFunction = term.substr(k+1, j-k-1);
+                                cout << "Test: mathFunction = " << mathFunction << endl;
+                                bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
+                                cout << "Test: bracketContent = " << bracketContent << endl;
+                                bracketResult = calcBracket("(" + bracketContent + ")"); // todo more parameter
+                                cout << "Test: bracketResult = " << bracketResult << endl;
 
-                    term = term.substr(0, i-1) + "(" + calcMathFunction + term.substr(endIndex);
-                    i = j;
+                                string newTerm = term.substr(0, k+1) + calcMathFunction(bracketResult, mathFunction);
+                                if(endIndex < term.size()-1) {
+                                    newTerm += term.substr(endIndex+1);
+                                }
+                                cout << "Test: newTerm = " << newTerm << endl;
+                                term = newTerm;
+                                break;
+                            }
+                            if(k == 0) {
+                                string mathFunction = term.substr(0, j);
+                                bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
+                                bracketResult = calcBracket("(" + bracketContent + ")");
+                                cout << "Test: mathFunction = " << mathFunction << endl;
+                                cout << "Test: bracketContent = " << bracketContent << endl;
+                                cout << "Test: bracketResult = " << bracketResult << endl;
+
+                                string newTerm = calcMathFunction(bracketResult, mathFunction);
+                                cout << "Test: newTerm = " << newTerm << endl;
+                                if(endIndex < term.size()-1) {
+                                    newTerm += term.substr(endIndex+1);
+                                cout << "Test: newTerm = " << newTerm << endl;
+                                }
+                                cout << "Test: newTerm = " << newTerm << endl;
+                                term = newTerm;
+                                break;
+                            }
+                        }
+
+                        i = 0;
+                        break;
+                    } else {
+                        bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
+                        bracketResult = calcBracket("(" + bracketContent + ")");
+                        cout << "Test: bracketContent = " << bracketContent << endl;
+                        cout << "Test: bracketResult = " << bracketResult << endl;
+
+                        string newTerm = "";
+                        if(startIndex != 0) {
+                            newTerm += term.substr(0, startIndex);
+                        }
+                        newTerm += bracketResult;
+                        if(endIndex < term.size()-1) {
+                            newTerm += term.substr(endIndex+1);
+                        }
+                        cout << "Test: newTerm = " << newTerm << endl;
+                        term = newTerm;
+
+                        i = 0;
+                        break;
+                    }
                 }
             }
         }
     }
+    return term;
 }
 
 double eval(string term) {
     term = checkBrackets(term);
 
-    term = evalBracketStep(term);
+    term = evalMathFunctions(term);
 
     term = evalStep(term,1);
     
