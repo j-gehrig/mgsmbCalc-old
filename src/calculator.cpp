@@ -1,10 +1,13 @@
+#include <cstddef>
 #include <iostream>
+#include <math.h>
 #include <string>
 #include <sstream>
 #include <cfloat>
 #include <cmath>
 #include <map>
 #include <vector>
+#include "../include/math.h"
 
 #define stringSizeType  std::string::size_type
 
@@ -261,7 +264,8 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << pow(params[0], params[1]);
+        strs << math::pow(params[0], params[1]);
+
         ans = strs.str();
         return ans;
     } else if(mathFunction == "exp") {
@@ -270,7 +274,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << exp(params[0]);
+        strs << math::exp(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "log") {
@@ -279,7 +283,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << log(params[1]) / log(params[0]);
+        strs << math::log(params[0], params[1]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "ln") {
@@ -288,7 +292,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << log(params[0]);
+        strs << math::ln(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "sin") {
@@ -297,7 +301,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << sin(params[0]);
+        strs << math::sin(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "cos") {
@@ -306,7 +310,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << cos(params[0]);
+        strs << math::cos(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "tan") {
@@ -315,7 +319,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << tan(params[0]);
+        strs << math::tan(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "arcsin") {
@@ -324,7 +328,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << asin(params[0]);
+        strs << math::arcsin(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "arccos") {
@@ -333,7 +337,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << acos(params[0]);
+        strs << math::arccos(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "arctan") {
@@ -341,7 +345,7 @@ string calcMathFunction(string term, string mathFunction) {
             cout << "Invalid amout of parameters! (1 needed)" << endl;
             return "0";
         }
-        strs << atan(params[0]);
+        strs << math::arctan(params[0]);
         ans = strs.str();
         return ans;
     } else {
@@ -361,20 +365,15 @@ string evalMathFunctions(string term) {
                     stringSizeType startIndex = j;
                     if(j != 0 && isPartOfMathFunction(term[j-1])) {
                         for(stringSizeType k = j-1; k >= 0; k--) {
-                            cout << "Test: k = " << k << endl;
                             if(!isPartOfMathFunction(term[k])) {
                                 string mathFunction = term.substr(k+1, j-k-1);
-                                cout << "Test: mathFunction = " << mathFunction << endl;
                                 bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
-                                cout << "Test: bracketContent = " << bracketContent << endl;
                                 bracketResult = calcBracket("(" + bracketContent + ")"); // todo more parameter
-                                cout << "Test: bracketResult = " << bracketResult << endl;
 
                                 string newTerm = term.substr(0, k+1) + calcMathFunction(bracketResult, mathFunction);
                                 if(endIndex < term.size()-1) {
                                     newTerm += term.substr(endIndex+1);
                                 }
-                                cout << "Test: newTerm = " << newTerm << endl;
                                 term = newTerm;
                                 break;
                             }
@@ -382,17 +381,11 @@ string evalMathFunctions(string term) {
                                 string mathFunction = term.substr(0, j);
                                 bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
                                 bracketResult = calcBracket("(" + bracketContent + ")");
-                                cout << "Test: mathFunction = " << mathFunction << endl;
-                                cout << "Test: bracketContent = " << bracketContent << endl;
-                                cout << "Test: bracketResult = " << bracketResult << endl;
 
                                 string newTerm = calcMathFunction(bracketResult, mathFunction);
-                                cout << "Test: newTerm = " << newTerm << endl;
                                 if(endIndex < term.size()-1) {
                                     newTerm += term.substr(endIndex+1);
-                                cout << "Test: newTerm = " << newTerm << endl;
                                 }
-                                cout << "Test: newTerm = " << newTerm << endl;
                                 term = newTerm;
                                 break;
                             }
@@ -403,8 +396,6 @@ string evalMathFunctions(string term) {
                     } else {
                         bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
                         bracketResult = calcBracket("(" + bracketContent + ")");
-                        cout << "Test: bracketContent = " << bracketContent << endl;
-                        cout << "Test: bracketResult = " << bracketResult << endl;
 
                         string newTerm = "";
                         if(startIndex != 0) {
@@ -414,7 +405,6 @@ string evalMathFunctions(string term) {
                         if(endIndex < term.size()-1) {
                             newTerm += term.substr(endIndex+1);
                         }
-                        cout << "Test: newTerm = " << newTerm << endl;
                         term = newTerm;
 
                         i = 0;
@@ -441,15 +431,25 @@ int main() {
     const int digits = 25;
 
     string term;
-    cout << "C++ calculator by mgsmemebook." << endl
-         << "Please enter the term, which is to be calculated:" << endl << endl;
-    getline(cin, term);
-    const string input = term;
+    cout << "C++ calculator by mgsmemebook." << endl << endl;
 
-    cout << endl << "calculating term \"" << input << "\"..." << endl;
+    while(true) {
+        cout << "Please enter the term, which is to be calculated:" << endl << endl;
+        getline(cin, term);
+        const string input = term;
 
-    double ans = round_up(eval(term), digits);
+        cout << endl << "Calculating term \"" << input << "\"..." << endl;
 
-    cout << "answer: " << ans << endl << endl;
+        double ans = round_up(eval(term), digits);
+
+        cout << "answer: " << ans << endl << endl << "Stop program? (y/N) ";
+
+        string response;
+        getline(cin, response);
+
+        cout << endl << endl;
+
+        if(response == "y" || response == "Y") break;
+    }
     return 0;
 }

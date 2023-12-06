@@ -34,8 +34,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/max/Server/C++ Tutorial/src",
-      "program": "/home/max/Server/C++ Tutorial/src/build/Debug/outDebug",
+      "cwd": "/home/max/Server/C++/Calculator/src",
+      "program": "/home/max/Server/C++/Calculator/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
