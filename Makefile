@@ -117,6 +117,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named eval
+
+# Build rule for target.
+eval: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 eval
+.PHONY : eval
+
+# fast build rule for target.
+eval/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eval.dir/build.make CMakeFiles/eval.dir/build
+.PHONY : eval/fast
+
+#=============================================================================
 # Target rules for targets named Calculator
 
 # Build rule for target.
@@ -129,29 +142,53 @@ Calculator/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/build
 .PHONY : Calculator/fast
 
-src/calculator.o: src/calculator.cpp.o
-.PHONY : src/calculator.o
+src/eval.o: src/eval.cpp.o
+.PHONY : src/eval.o
 
 # target to build an object file
-src/calculator.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/calculator.cpp.o
-.PHONY : src/calculator.cpp.o
+src/eval.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eval.dir/build.make CMakeFiles/eval.dir/src/eval.cpp.o
+.PHONY : src/eval.cpp.o
 
-src/calculator.i: src/calculator.cpp.i
-.PHONY : src/calculator.i
+src/eval.i: src/eval.cpp.i
+.PHONY : src/eval.i
 
 # target to preprocess a source file
-src/calculator.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/calculator.cpp.i
-.PHONY : src/calculator.cpp.i
+src/eval.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eval.dir/build.make CMakeFiles/eval.dir/src/eval.cpp.i
+.PHONY : src/eval.cpp.i
 
-src/calculator.s: src/calculator.cpp.s
-.PHONY : src/calculator.s
+src/eval.s: src/eval.cpp.s
+.PHONY : src/eval.s
 
 # target to generate assembly for a file
-src/calculator.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/calculator.cpp.s
-.PHONY : src/calculator.cpp.s
+src/eval.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eval.dir/build.make CMakeFiles/eval.dir/src/eval.cpp.s
+.PHONY : src/eval.cpp.s
+
+src/mgsmbCalc.o: src/mgsmbCalc.cpp.o
+.PHONY : src/mgsmbCalc.o
+
+# target to build an object file
+src/mgsmbCalc.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/mgsmbCalc.cpp.o
+.PHONY : src/mgsmbCalc.cpp.o
+
+src/mgsmbCalc.i: src/mgsmbCalc.cpp.i
+.PHONY : src/mgsmbCalc.i
+
+# target to preprocess a source file
+src/mgsmbCalc.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/mgsmbCalc.cpp.i
+.PHONY : src/mgsmbCalc.cpp.i
+
+src/mgsmbCalc.s: src/mgsmbCalc.cpp.s
+.PHONY : src/mgsmbCalc.s
+
+# target to generate assembly for a file
+src/mgsmbCalc.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/mgsmbCalc.cpp.s
+.PHONY : src/mgsmbCalc.cpp.s
 
 # Help Target
 help:
@@ -162,9 +199,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Calculator"
-	@echo "... src/calculator.o"
-	@echo "... src/calculator.i"
-	@echo "... src/calculator.s"
+	@echo "... eval"
+	@echo "... src/eval.o"
+	@echo "... src/eval.i"
+	@echo "... src/eval.s"
+	@echo "... src/mgsmbCalc.o"
+	@echo "... src/mgsmbCalc.i"
+	@echo "... src/mgsmbCalc.s"
 .PHONY : help
 
 

@@ -7,16 +7,11 @@
 #include <cmath>
 #include <map>
 #include <vector>
-#include "../include/math.h"
+#include "../include/math.h" // my own library for math functions
 
 #define stringSizeType  std::string::size_type
 
 using namespace std;
-
-double round_up(double value, int decimal_places) {
-    const double multiplier = std::pow(10.0, decimal_places);
-    return std::ceil(value * multiplier) / multiplier;
-}
 
 bool isMathOperator(char c) {
     const char oprChars[5] = {'+', '-', '*', '/', ','};
@@ -25,14 +20,14 @@ bool isMathOperator(char c) {
     }
     return false;
 }
-bool isBracket(char c) {
+bool isBracket(char c) { 
     const char brackets[2] = {'(', ')'};
     for(char i : brackets) {
         if(c == i) return true;
     }
     return false;
 }
-bool isPartOfMathFunction(char c) {
+bool isPartOfMathFunction(char c) { 
     return (!isdigit(c) && !isBracket(c) && !isMathOperator(c));
 }
 bool isStartOfNewLeftNumber(char a, char b, int mode, char mathOperator) {
@@ -40,22 +35,25 @@ bool isStartOfNewLeftNumber(char a, char b, int mode, char mathOperator) {
                 && (mode == 1 
                     && (b == '+' || b == '-')
                     && a != mathOperator);
-    //cout << "isStartOfNewLeftNumber: " << res << endl;
     return res;
 } 
 bool isEndOfNewRightNumber(char b) {
     bool res = (!isdigit(b) && b != '.');
-    //cout << "isEndOfNewRightNumber: " << res << endl;
     return res;
 } 
 
+
+// -- eval functions --
+
 string evalStep(string term, int mode) {
-    string newterm = term;
+    // This function calculates the parts of the term with the basic arithmetic operators (+-*/)
+    // The mode determines the order of the calculations
 
-    //cout << "____" << endl;
-    //cout << "mode: " << mode << endl;
+    string newterm = term;  // Variable for the term that will have all the basic arithmetic operations 
+                            // replaced with their value 
 
-    char opChar1;
+    char operatorChars[4] = {'*', '/', '+', '-'};
+    char opChar1; 
     char opChar2;
     if(mode == 1) {
         opChar1 = '*';
@@ -63,11 +61,8 @@ string evalStep(string term, int mode) {
     } else if(mode == 2) {
         opChar1 = '+';
         opChar2 = '-';
-    } else {
-        return term;
-    }
-
-    if(term.size() < 2) {
+    } 
+    if(mode != 1 || mode != 2) {
         return term;
     }
 
@@ -417,39 +412,20 @@ string evalMathFunctions(string term) {
     return term;
 }
 
-double eval(string term) {
-    term = checkBrackets(term);
+namespace Eval {
+    double eval(string term) {
+        term = checkBrackets(term);
 
-    term = evalMathFunctions(term);
+        term = evalMathFunctions(term);
 
-    term = evalStep(term,1);
+        term = evalStep(term,1);
     
-    return ::atof(term.c_str());
-}
-
-int main() {
-    const int digits = 25;
-
-    string term;
-    cout << "C++ calculator by mgsmemebook." << endl << endl;
-
-    while(true) {
-        cout << "Please enter the term, which is to be calculated:" << endl << endl;
-        getline(cin, term);
-        const string input = term;
-
-        cout << endl << "Calculating term \"" << input << "\"..." << endl;
-
-        double ans = round_up(eval(term), digits);
-
-        cout << "answer: " << ans << endl << endl << "Stop program? (y/N) ";
-
-        string response;
-        getline(cin, response);
-
-        cout << endl << endl;
-
-        if(response == "y" || response == "Y") break;
+        return std::atof(term.c_str());
     }
-    return 0;
 }
+/* TODO:
+    - Fix issue with number*mathfunction
+    - Add more comments
+    - Make code more readable
+    - Testing
+*/
