@@ -1,0 +1,5 @@
+.vscode
+gitignore
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake

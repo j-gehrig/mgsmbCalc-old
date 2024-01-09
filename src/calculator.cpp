@@ -264,7 +264,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << math::pow(params[0], params[1]);
+        strs << Math::pow(params[0], params[1]);
 
         ans = strs.str();
         return ans;
@@ -274,7 +274,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << math::exp(params[0]);
+        strs << Math::exp(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "log") {
@@ -283,7 +283,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << math::log(params[0], params[1]);
+        strs << Math::log(params[0], params[1]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "ln") {
@@ -292,7 +292,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
 
-        strs << math::ln(params[0]);
+        strs << Math::ln(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "sin") {
@@ -301,7 +301,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << math::sin(params[0]);
+        strs << Math::sin(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "cos") {
@@ -310,7 +310,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << math::cos(params[0]);
+        strs << Math::cos(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "tan") {
@@ -319,7 +319,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << math::tan(params[0]);
+        strs << Math::tan(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "arcsin") {
@@ -328,7 +328,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << math::arcsin(params[0]);
+        strs << Math::arcsin(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "arccos") {
@@ -337,7 +337,7 @@ string calcMathFunction(string term, string mathFunction) {
             return "0";
         }
         
-        strs << math::arccos(params[0]);
+        strs << Math::arccos(params[0]);
         ans = strs.str();
         return ans;
     } else if(mathFunction == "arctan") {
@@ -345,7 +345,7 @@ string calcMathFunction(string term, string mathFunction) {
             cout << "Invalid amout of parameters! (1 needed)" << endl;
             return "0";
         }
-        strs << math::arctan(params[0]);
+        strs << Math::arctan(params[0]);
         ans = strs.str();
         return ans;
     } else {
