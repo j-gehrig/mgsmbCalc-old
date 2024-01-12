@@ -7,155 +7,159 @@
 #include <cmath>
 #include <map>
 #include <vector>
-#include "../include/math.h" // my own library for math functions
+#include "../include/math.h" // my own library for math functions https://github.com/j-gehrig/math
 
 #define stringSizeType  std::string::size_type
 
 using namespace std;
 
-bool isMathOperator(char c) {
-    const char oprChars[5] = {'+', '-', '*', '/', ','};
-    for(char i : oprChars) {
-        if(c == i) return true;
+bool isMathOperatorOrDecimalPoint(char c) {
+    const char operators[5] = {'+', '-', '*', '/', ','};
+    for(char operator : operators) {
+        if(c == operator) return true;
     }
     return false;
 }
 bool isBracket(char c) { 
     const char brackets[2] = {'(', ')'};
-    for(char i : brackets) {
-        if(c == i) return true;
+    for(char bracket : brackets) {
+        if(c == bracket) return true;
     }
     return false;
 }
 bool isPartOfMathFunction(char c) { 
-    return (!isdigit(c) && !isBracket(c) && !isMathOperator(c));
+    return (!isdigit(c) && !isBracket(c) && !isMathOperatorOrDecimalPoint(c));
 }
-bool isStartOfNewLeftNumber(char a, char b, int mode, char mathOperator) {
-    bool res = (!isdigit(b) && b != '.')
+bool isStartOfLeftNumber(char firstChar, char secondChar, int mode, char mathOperator) {
+    bool res = (!isdigit(secondChar) && secondChar != '.')
                 && (mode == 1 
-                    && (b == '+' || b == '-')
-                    && a != mathOperator);
+                    && (secondChar == '+' || secondChar == '-')
+                    && firstChar != mathOperator);
     return res;
 } 
-bool isEndOfNewRightNumber(char b) {
+bool isEndOfRightNumber(char b) {
     bool res = (!isdigit(b) && b != '.');
     return res;
-} 
+}
 
 
 // -- eval functions --
 
-string evalStep(string term, int mode) {
+string evalArithmeticOperators(string &term, int mode) {
     // This function calculates the parts of the term with the basic arithmetic operators (+-*/)
     // The mode determines the order of the calculations
 
-    string newterm = term;  // Variable for the term that will have all the basic arithmetic operations 
-                            // replaced with their value 
-
-    char operatorChars[4] = {'*', '/', '+', '-'};
-    char opChar1; 
-    char opChar2;
-    if(mode == 1) {
-        opChar1 = '*';
-        opChar2 = '/';
-    } else if(mode == 2) {
-        opChar1 = '+';
-        opChar2 = '-';
-    } 
-    if(mode != 1 || mode != 2) {
-        return term;
+    char operators[4] = {'*', '/', '+', '-'};
+    int operatorOneIndex = 2 * mode; // either  2 * 0 = 0  or  2 * 1 = 2
+    int operatorTwoIndex = 2 * mode + 1;
+    if(mode != 0 || mode != 1) {
+        return;
     }
 
-    for(stringSizeType i = 1; i < term.size(); i++) {
-        if(term[i] == opChar1 || term[i] == opChar2) {
-            double number1;
-            double number2;
-            double newnumber;
-            stringSizeType startIndex;
-            stringSizeType endIndex;
+    while(true) {
+        // Loops until the operators of the mode are not part of the term anymore (except a possible sign at the beginning)
+        for(stringSizeType i = 1; i < term.size(); i++) { // Go through every character of the term
+            if(term[i] == operators[operatorOneIndex] || term[i] == operatorTwoIndex) {
+                // Checks whether current operator is the one corresponding to the mode
+                double leftNumber; // Number to the left of the operator
+                double rightNumber; // Number to the right of the operator
+                double calculatedNumber;
 
-            char mathOperator = term[i];
+                stringSizeType startIndexOfLeftNumber;
+                stringSizeType endIndexOfLeftNumber;
 
-            for(stringSizeType j = i-1;; j--) {
-                char a = term[j];
-                char b = term[j];
-                if(j > 0) {
-                    a = term[j-1];
-                }
-                //cout << "j: " << j << "; a: " << a << "; b: " << b << endl;
-                if(isStartOfNewLeftNumber(a, b, mode, mathOperator) && term[0] != '-') { 
-                    number1 = ::atof(term.substr(j+1,i-j-1).c_str());
-                    startIndex = j+1;
-                    break;
-                } 
-                if(j == 0) {
-                    stringSizeType dx = i;
-                    if(dx == 0) {
-                        float number_char = (float)(term[0]-'0');
-                        number1 = number_char;
+                char operator = term[i];
+                stringSizeType operatorIndex = i;
+
+                // Consider making seperate functions
+                for(stringSizeType leftCharIndex = operatorIndex-1; ; leftCharIndex--) { 
+                    // Goes through the chars to the left of the operator to find the left Number
+                    char secondChar = term[leftCharIndex];
+                    char firstChar;
+                    if(leftCharIndex > 0) { // This makes sure the index is never out of bounds
+                        firstChar = term[leftCharIndex-1];
                     } else {
-                        number1 = ::atof(term.substr(0,dx).c_str());
+                        firstChar = secondChar;
                     }
-                    startIndex = 0;
-                    break;
+                    if(isStartOfLeftNumber(firstChar, secondChar, mode, operator) && term[0] != '-') { 
+                        // Checks whether the beginning of the first number, which is being calculated, is reached
+                        // Also makes sure a negative sign isn't being interpreted as an operator
+                        startIndexOfLeftNumber = leftCharIndex+1;
+                        stringSizeType substrIndexDelta = operatorIndex-1 - startIndexOfLeftNumber-1;
+                        leftNumber = ::atof(term.substr(startIndexOfLeftNumber,substrIndexDelta).c_str());
+                        // Substring is converted to C String first, so it can be converted to float using atof
+                        break; // Left Number is found
+                    } 
+                    if(leftCharIndex == 0) {
+                        // The left number is the first number of the term
+                        leftNumber = ::atof(term.substr(0,operatorIndex).c_str()); 
+                        // Substring is converted to C String first, so it can be converted to float using atof
+                        startIndexOfLeftNumber = 0;
+                        break; // Left Number is found
+                    }
                 }
-            }
-            //cout << "number 1: " << number1 << "; startIndex: " << startIndex << endl;
-            for(stringSizeType j = i+1; j < term.size(); j++) { 
-                if(j == term.size()-1) {
-                    stringSizeType dx = j-i;
-                    if(dx == 0) {
-                        float number_char = (float)(term[i+1]-'0');
-                        number2 = number_char;
-                    } else {
-                        number2 = ::atof(term.substr(i+1,dx).c_str());
+
+                for(stringSizeType rightCharIndex = operatorIndex+1; rightCharIndex < term.size(); rightCharIndex++) { 
+                    // Goes through the chars to the right of the operator to find the right Number
+                
+                    if(rightCharIndex == term.size()-1) { // Checks whether the last character is reached
+                        stringSizeType deltaIndex = rightCharIndex-operatorIndex; 
+                        // The number of chars the loop has gone through since the beginning of the loop
+                        if(deltaIndex == 1) { // Right number is the last digit
+                            rightNumber = (double)(term[operatorIndex+1]-'0'); // digit is converted to int and then cast to double
+                        } else {
+                            rightNumber = ::atof(term.substr(operatorIndex+1,deltaIndex).c_str());
+                            // Substring is converted to C String first, so it can be converted to float using atof
+                        }
+                        endIndexOfRightNumber = rightCharIndex;
+                        break; // Left Number is found
                     }
-                    endIndex = j;
-                    break;
+
+                    char secondRightChar = term[rightCharIndex+1];
+                    if(isEndOfRightNumber(secondRightChar)) {
+                        stringSizeType deltaIndex = rightCharIndex-operatorIndex;
+                        // The number of chars the loop has gone through since the beginning of the loop
+                        rightNumber = ::atof(term.substr(operatorIndex+1,deltaIndex).c_str());
+                        // Substring is converted to C String first, so it can be converted to float using atof
+                        endIndexOfRightNumber = rightCharIndex;
+                        break; // Left Number is found
+                    } 
                 }
-                char b = term[j+1];
-                //cout << "j: " << j << "; a: " << a << "; b: " << b << endl;
-                if(isEndOfNewRightNumber(b)) {
-                    stringSizeType dx = j-i;
-                    if(dx == 0) {
-                        float number_char = (float)(term[i+1]-'0');
-                        number2 = number_char;
-                    } else {
-                        number2 = ::atof(term.substr(i+1,dx).c_str());
-                    }
-                    endIndex = j;
-                    break;
-                } 
-            }
-            //cout << "number 2: " << number2 << "; endIndex: " << endIndex << endl;
 
-            ostringstream stream;
-            if(mathOperator == '*') {
-                newnumber = number1 * number2;
-            } else if(mathOperator == '/') {
-                newnumber = number1 / number2;
-            } else if(mathOperator == '+') {
-                newnumber = number1 + number2;
-            } else if(mathOperator == '-') {
-                newnumber = number1 - number2;
-            }
+                ostringstream stream;
+                if(operator == '*') {
+                    calculatedNumber = leftNumber * rightNumber;
+                } else if(operator == '/') {
+                    calculatedNumber = leftNumber / rightNumber;
+                } else if(operator == '+') {
+                    calculatedNumber = leftNumber + rightNumber;
+                } else if(operator == '-') {
+                    calculatedNumber = leftNumber - rightNumber;
+                }
 
-            if(startIndex == 0) {
-                stream << newnumber << term.substr(endIndex+1);
-                newterm = stream.str();
-            } else {
-                stream << term.substr(0, startIndex) << newnumber << term.substr(endIndex+1);
-                newterm = stream.str();
+                if(startIndexOfLeftNumber == 0) {
+                    stream << calculatedNumber << term.substr(endIndexOfLeftNumber+1);
+                    term = stream.str();
+                } else if(endIndexOfRightNumber == term.size()-1) {
+                    stream << term.substr(0, startIndexOfLeftNumber) << calculatedNumber;
+                    term = stream.str();
+                } else {
+                    stream << term.substr(0, startIndexOfLeftNumber) << calculatedNumber << term.substr(endIndexOfLeftNumber+1);
+                    term = stream.str();
+                }
+                break;
             }
-            //cout << term << " => " << newterm << endl;
-            newterm = evalStep(newterm, mode);
+        }
+        if((term.substr(1).find(operators[operatorOneIndex]) != std::string::npos) || (term.substr(1).find(operators[operatorOneIndex]) != std::string::npos)) {
+            continue;
+        } else if(mode == 3) {
             break;
+        } else {
+            mode++;
         }
     }
-    mode++;
-    newterm = evalStep(newterm, mode);
 
-    return newterm;
+    return;
 }
 
 string checkBrackets(string term) {
@@ -212,12 +216,15 @@ string calcBracket(string term) {
     stringSizeType lastComma = 0;
     for(stringSizeType i = 0; i < centerBracket.size(); i++) {
         if(centerBracket[i] == ',') {
-            evalCenterBracket += evalStep(centerBracket.substr(lastComma, i-1-lastComma), 1) + ",";
+            evalCenterBracket = centerBracket.substr(lastComma, i-1-lastComma);
+            evalArithmeticOperators(evalCenterBracket);
+            evalCenterBracket += ",";
             lastComma = i+1;
         }
     }
     if(evalCenterBracket.empty()) {
-        evalCenterBracket = evalStep(centerBracket,1);
+        evalCenterBracket = centerBracket
+        evalArithmeticOperators(evalArithmeticOperators, 0);
     }
 
     return (term.substr(0,startIndex)+evalCenterBracket+term.substr(endIndex+1));
@@ -418,7 +425,7 @@ namespace Eval {
 
         term = evalMathFunctions(term);
 
-        term = evalStep(term,1);
+        evalArithmeticOperators(term,0);
     
         return std::atof(term.c_str());
     }
@@ -427,5 +434,6 @@ namespace Eval {
     - Fix issue with number*mathfunction
     - Add more comments
     - Make code more readable
+    - Use references in functions
     - Testing
 */
