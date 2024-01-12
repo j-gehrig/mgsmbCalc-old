@@ -15,8 +15,8 @@ using namespace std;
 
 bool isMathOperatorOrDecimalPoint(char c) {
     const char operators[5] = {'+', '-', '*', '/', ','};
-    for(char operator : operators) {
-        if(c == operator) return true;
+    for(char operatorVar : operators) {
+        if(c == operatorVar) return true;
     }
     return false;
 }
@@ -45,7 +45,7 @@ bool isEndOfRightNumber(char b) {
 
 // -- eval functions --
 
-string evalArithmeticOperators(string &term, int mode) {
+void evalArithmeticOperators(string &term, int mode) {
     // This function calculates the parts of the term with the basic arithmetic operators (+-*/)
     // The mode determines the order of the calculations
 
@@ -66,9 +66,9 @@ string evalArithmeticOperators(string &term, int mode) {
                 double calculatedNumber;
 
                 stringSizeType startIndexOfLeftNumber;
-                stringSizeType endIndexOfLeftNumber;
+                stringSizeType endIndexOfRightNumber;
 
-                char operator = term[i];
+                char operatorVar = term[i];
                 stringSizeType operatorIndex = i;
 
                 // Consider making seperate functions
@@ -81,7 +81,7 @@ string evalArithmeticOperators(string &term, int mode) {
                     } else {
                         firstChar = secondChar;
                     }
-                    if(isStartOfLeftNumber(firstChar, secondChar, mode, operator) && term[0] != '-') { 
+                    if(isStartOfLeftNumber(firstChar, secondChar, mode, operatorVar) && term[0] != '-') { 
                         // Checks whether the beginning of the first number, which is being calculated, is reached
                         // Also makes sure a negative sign isn't being interpreted as an operator
                         startIndexOfLeftNumber = leftCharIndex+1;
@@ -127,24 +127,24 @@ string evalArithmeticOperators(string &term, int mode) {
                 }
 
                 ostringstream stream;
-                if(operator == '*') {
+                if(operatorVar == '*') {
                     calculatedNumber = leftNumber * rightNumber;
-                } else if(operator == '/') {
+                } else if(operatorVar == '/') {
                     calculatedNumber = leftNumber / rightNumber;
-                } else if(operator == '+') {
+                } else if(operatorVar == '+') {
                     calculatedNumber = leftNumber + rightNumber;
-                } else if(operator == '-') {
+                } else if(operatorVar == '-') {
                     calculatedNumber = leftNumber - rightNumber;
                 }
 
                 if(startIndexOfLeftNumber == 0) {
-                    stream << calculatedNumber << term.substr(endIndexOfLeftNumber+1);
+                    stream << calculatedNumber << term.substr(endIndexOfRightNumber+1);
                     term = stream.str();
                 } else if(endIndexOfRightNumber == term.size()-1) {
                     stream << term.substr(0, startIndexOfLeftNumber) << calculatedNumber;
                     term = stream.str();
                 } else {
-                    stream << term.substr(0, startIndexOfLeftNumber) << calculatedNumber << term.substr(endIndexOfLeftNumber+1);
+                    stream << term.substr(0, startIndexOfLeftNumber) << calculatedNumber << term.substr(endIndexOfRightNumber+1);
                     term = stream.str();
                 }
                 break;
@@ -217,14 +217,14 @@ string calcBracket(string term) {
     for(stringSizeType i = 0; i < centerBracket.size(); i++) {
         if(centerBracket[i] == ',') {
             evalCenterBracket = centerBracket.substr(lastComma, i-1-lastComma);
-            evalArithmeticOperators(evalCenterBracket);
+            evalArithmeticOperators(evalCenterBracket, 0);
             evalCenterBracket += ",";
             lastComma = i+1;
         }
     }
     if(evalCenterBracket.empty()) {
-        evalCenterBracket = centerBracket
-        evalArithmeticOperators(evalArithmeticOperators, 0);
+        evalCenterBracket = centerBracket;
+        evalArithmeticOperators(evalCenterBracket, 0);
     }
 
     return (term.substr(0,startIndex)+evalCenterBracket+term.substr(endIndex+1));
