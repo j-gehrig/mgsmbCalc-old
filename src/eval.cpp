@@ -5,8 +5,6 @@
 #include <sstream>
 #include <cfloat>
 #include <cmath>
-#include <map>
-#include <vector>
 #include "../include/math.h" // my own library for math functions https://github.com/j-gehrig/math
 
 #define stringSizeType  std::string::size_type
@@ -52,12 +50,12 @@ void evalArithmeticOperators(string &term, int mode) {
     char operators[4] = {'*', '/', '+', '-'};
     int operatorOneIndex = 2 * mode; // either  2 * 0 = 0  or  2 * 1 = 2
     int operatorTwoIndex = 2 * mode + 1;
-    if(mode != 0 || mode != 1) {
-        return;
-    }
 
-    while(true) {
-        // Loops until the operators of the mode are not part of the term anymore (except a possible sign at the beginning)
+    while(mode == 0 || mode == 1) {
+        // Loops until all the operators are calculated (except a possible sign at the beginning)
+        if((term.substr(1).find(operators[operatorOneIndex]) == std::string::npos) && (term.substr(1).find(operators[operatorTwoIndex]) == std::string::npos)) {
+            mode++;
+        }
         for(stringSizeType i = 1; i < term.size(); i++) { // Go through every character of the term
             if(term[i] == operators[operatorOneIndex] || term[i] == operatorTwoIndex) {
                 // Checks whether current operator is the one corresponding to the mode
@@ -126,7 +124,6 @@ void evalArithmeticOperators(string &term, int mode) {
                     } 
                 }
 
-                ostringstream stream;
                 if(operatorVar == '*') {
                     calculatedNumber = leftNumber * rightNumber;
                 } else if(operatorVar == '/') {
@@ -137,6 +134,7 @@ void evalArithmeticOperators(string &term, int mode) {
                     calculatedNumber = leftNumber - rightNumber;
                 }
 
+                ostringstream stream;
                 if(startIndexOfLeftNumber == 0) {
                     stream << calculatedNumber << term.substr(endIndexOfRightNumber+1);
                     term = stream.str();
@@ -147,216 +145,198 @@ void evalArithmeticOperators(string &term, int mode) {
                     stream << term.substr(0, startIndexOfLeftNumber) << calculatedNumber << term.substr(endIndexOfRightNumber+1);
                     term = stream.str();
                 }
-                break;
+                break; // Breaks out of for loop
             }
-        }
-        if((term.substr(1).find(operators[operatorOneIndex]) != std::string::npos) || (term.substr(1).find(operators[operatorOneIndex]) != std::string::npos)) {
-            continue;
-        } else if(mode == 3) {
-            break;
-        } else {
-            mode++;
         }
     }
 
     return;
 }
 
-string checkBrackets(string term) {
-    vector<stringSizeType> openedBrackets{}; // total opened brackets
-    vector<stringSizeType> closedBrackets{}; // total closed brackets
+void addMissingBrackets(string &term) {
+    int openedBracketCount = 0; // total opened brackets
+    int closedBracketCount = 0; // total closed brackets
 
-    for(stringSizeType i = 0; i < term.size(); i++) {
-        if(term[i] == '(') {
-            openedBrackets.push_back(i);
-        } else if(term[i] == ')') {
-            closedBrackets.push_back(i);
+    for(stringSizeType charIndex = 0; charIndex < term.size(); charIndex++) { 
+        // Loops through the term to find all brackets in the term
+        if(term[charIndex] == '(') {
+            openedBracketCount++;
+        } else if(term[charIndex] == ')') {
+            closedBracketCount++;
         }
     }
 
-    int bracketDiff = static_cast<int>(closedBrackets.size() - openedBrackets.size());
-    vector<stringSizeType> newArray;
-    if(bracketDiff < 0) { // less closed than opened
-        for(;bracketDiff < 0; bracketDiff++) {
-            term = term.append(")");
-        }
-    } else if(bracketDiff > 0) {
-        for(stringSizeType i = term.size(); i > 0; i--) { // i = term.size() to solve warn
-            if(term[i-1] == ')') {
-                term = term.substr(0, i-2) + term.substr(i);
-            }
-        }
+    int bracketCountDifference = closedBracketCount - openedBracketCount;
+    // The difference of the closed and opened brackets
+    for(;bracketCountDifference < 0; bracketCountDifference++) {
+        // Less closed than opened; need to add closed brackets at the end
+        term = term.append(")"); 
+    }   
+    for(;bracketCountDifference > 0; bracketCountDifference--) {
+        // More closed than opened; need to add opened brackets at the beginning
+        term = "(" + term;
     }
-    return term;
+    return;
 }
 
-string calcBracket(string term) {
-    map<stringSizeType,stringSizeType> bracketPair{}; // stores every pair of brackets
-    vector<stringSizeType> openedBrackets{}; // total opened brackets
-    vector<stringSizeType> closedBrackets{}; // total closed brackets
-    vector<stringSizeType> stillOpenedBrackets{}; // opened brackets which haven't been asigned a closed bracket yet
-
-    for(stringSizeType i = 0; i < term.size(); i++) {
-        if(term[i] == '(') {
-            openedBrackets.push_back(i);
-            stillOpenedBrackets.push_back(i);
-        } else if(term[i] == ')') {
-            closedBrackets.push_back(i);
-            bracketPair[stillOpenedBrackets[stillOpenedBrackets.size()-1]] = i;
-            stillOpenedBrackets.pop_back();
-        }
-    }
-
-    stringSizeType startIndex = openedBrackets[openedBrackets.size()-1];
-    stringSizeType endIndex = bracketPair[startIndex];
-    stringSizeType delta = endIndex-startIndex-1;
-
-    string centerBracket = term.substr(startIndex+1,delta);
-    string evalCenterBracket = "";
-    stringSizeType lastComma = 0;
-    for(stringSizeType i = 0; i < centerBracket.size(); i++) {
-        if(centerBracket[i] == ',') {
-            evalCenterBracket = centerBracket.substr(lastComma, i-1-lastComma);
-            evalArithmeticOperators(evalCenterBracket, 0);
-            evalCenterBracket += ",";
-            lastComma = i+1;
-        }
-    }
-    if(evalCenterBracket.empty()) {
-        evalCenterBracket = centerBracket;
-        evalArithmeticOperators(evalCenterBracket, 0);
-    }
-
-    return (term.substr(0,startIndex)+evalCenterBracket+term.substr(endIndex+1));
-}
-
-string evalBracketStep(string term) {
-    int i = 0;
-    while(term.find('(') != string::npos || term.find(')') != string::npos) {
-        term = calcBracket(term);
-        i++;
-        if(i == 1000) { break; }
-    }
-
-    return term;
-}
-
-string calcMathFunction(string term, string mathFunction) {
-    string ans = term;
-    ostringstream strs; // for conversion
-    vector<double> params = {};
-    stringSizeType newParamIndex = 0;
-
-    if(term.size() > 1) {
-        for(stringSizeType i = 0; i < term.size(); i++) {
-            if(term[i] == ',') {
-                params.push_back(stod(term.substr(newParamIndex, i-1-newParamIndex)));
-                newParamIndex = i+1;
-            }
-        }
-    }
-
-    if(params.empty()) {
-        params.push_back(stod(term));
-    }
-
+double calcMathFunction(string &mathFunction, const int argumentCount, const char** arguments) {
     if(mathFunction == "pow") {
-        if(params.size() != 2) {
-            cout << "Invalid amout of parameters! (2 needed)" << endl;
-            return "0";
+        if(argumentCount != 2) {
+            cout << "Invalid amout of arguments! (2 needed)" << endl;
+            return 0;
         }
+        return Math::pow(std::strtod(arguments[0], nullptr), std::strtod(arguments[1], nullptr));
 
-        strs << Math::pow(params[0], params[1]);
-
-        ans = strs.str();
-        return ans;
     } else if(mathFunction == "exp") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
+        return Math::exp(std::strtod(arguments[0], nullptr));
 
-        strs << Math::exp(params[0]);
-        ans = strs.str();
-        return ans;
     } else if(mathFunction == "log") {
-        if(params.size() != 2) {
-            cout << "Invalid amout of parameters! (2 needed)" << endl;
-            return "0";
+        if(argumentCount != 2) {
+            cout << "Invalid amout of arguments! (2 needed)" << endl;
+            return 0;
         }
+        return Math::log(std::strtod(arguments[0], nullptr), std::strtod(arguments[1], nullptr));
 
-        strs << Math::log(params[0], params[1]);
-        ans = strs.str();
-        return ans;
     } else if(mathFunction == "ln") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
+        return Math::ln(std::strtod(arguments[0], nullptr));
 
-        strs << Math::ln(params[0]);
-        ans = strs.str();
-        return ans;
     } else if(mathFunction == "sin") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
-        
-        strs << Math::sin(params[0]);
-        ans = strs.str();
-        return ans;
+        return Math::sin(std::strtod(arguments[0], nullptr));
+
     } else if(mathFunction == "cos") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
-        
-        strs << Math::cos(params[0]);
-        ans = strs.str();
-        return ans;
+        return Math::cos(std::strtod(arguments[0], nullptr));
+
     } else if(mathFunction == "tan") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
-        
-        strs << Math::tan(params[0]);
-        ans = strs.str();
-        return ans;
+        return Math::tan(std::strtod(arguments[0], nullptr));
+
     } else if(mathFunction == "arcsin") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
-        
-        strs << Math::arcsin(params[0]);
-        ans = strs.str();
-        return ans;
+        return Math::arcsin(std::strtod(arguments[0], nullptr));
+
     } else if(mathFunction == "arccos") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
-        
-        strs << Math::arccos(params[0]);
-        ans = strs.str();
-        return ans;
+        return Math::arccos(std::strtod(arguments[0], nullptr));
+
     } else if(mathFunction == "arctan") {
-        if(params.size() != 1) {
-            cout << "Invalid amout of parameters! (1 needed)" << endl;
-            return "0";
+        if(argumentCount != 1) {
+            cout << "Invalid amout of arguments! (1 needed)" << endl;
+            return 0;
         }
-        strs << Math::arctan(params[0]);
-        ans = strs.str();
-        return ans;
+        return Math::arctan(std::strtod(arguments[0], nullptr));
+
     } else {
         cout << "Error: Mathematical function \"" << mathFunction << "\" is invalid!" << endl; 
-        return "0";
+        return 0;
     }
 }
 
-string evalMathFunctions(string term) {
+void evalInnerBracket(string &term) { // This function calculates the last inner bracket pair
+    stringSizeType innerOpenedBracketIndex;
+    stringSizeType innerClosedBracketIndex;
+    stringSizeType lastClosedBracketIndex;
+
+    for(stringSizeType charIndex = 0; charIndex < term.size(); charIndex++) {
+        // Loops through term to find bracket pairs
+        if(term[charIndex] == ')') {
+            lastClosedBracketIndex = charIndex;
+        } else if(term[charIndex] == '(') {
+            // The last opened bracket is part of the last inner bracket pair
+            innerOpenedBracketIndex = charIndex;
+            innerClosedBracketIndex = lastClosedBracketIndex; 
+            // The last closed bracket which is found is part of the bracket pair; all other brackets should be ignored
+        }
+    }
+
+    stringSizeType bracketPairIndexDelta = innerClosedBracketIndex-innerOpenedBracketIndex-1;
+
+    string centerBracketContent = term.substr(innerOpenedBracketIndex+1, bracketPairIndexDelta);
+    string evalFunctionArgument = "";
+
+    stringSizeType argIndex = 0;
+    int argumentCount = 0;
+    const char* arguments[] = {};
+    for(stringSizeType charIndex = 0; charIndex < centerBracketContent.size(); charIndex++) {
+        // Loops through bracket content to evaluate possible function arguments 
+        // (seperated by commas) or the bracket content
+        if(centerBracketContent[charIndex] == ',') {
+            evalFunctionArgument = centerBracketContent.substr(argIndex, charIndex-1-argIndex);
+            evalArithmeticOperators(evalFunctionArgument, 0);
+            // A function argument is evaluated
+
+            argIndex = charIndex+1;
+            arguments[argumentCount] = evalFunctionArgument.c_str();
+            argumentCount++;
+        } else if(charIndex == centerBracketContent.size()-1) {
+            evalFunctionArgument = centerBracketContent.substr(argIndex, charIndex-1-argIndex);
+            evalArithmeticOperators(evalFunctionArgument, 0);
+            // The last function argument or bracket content is evaluated
+
+            arguments[argumentCount] = evalFunctionArgument.c_str();
+            argumentCount++;
+        }
+    }
+    arguments[argumentCount] = nullptr;
+
+    if(isPartOfMathFunction(term[innerOpenedBracketIndex-1])) {
+        // The mathematical function is being calculated here
+        string mathFunction = "";
+        stringSizeType mathFunctionIndex = innerOpenedBracketIndex-1;
+        const char** argumentArray = arguments;
+
+        for(; isPartOfMathFunction(term[mathFunctionIndex]); mathFunctionIndex--) {
+            // Get math function
+            mathFunction = term[mathFunctionIndex] + mathFunction;
+        }
+        mathFunctionIndex++;
+
+        string evalMathFunction = std::to_string(calcMathFunction(mathFunction, argumentCount, argumentArray));
+        term = term.substr(0,mathFunctionIndex) + evalMathFunction + term.substr(innerClosedBracketIndex+1);
+        // Bracket is replaced with it's evaluated content
+    } else {
+        term = term.substr(0,innerClosedBracketIndex) + evalFunctionArgument + term.substr(innerClosedBracketIndex+1);
+        // Bracket is replaced with it's evaluated content
+    }
+
+    return;
+}
+
+void evalBrackets(string &term) {
+    int i = 0;
+    while((term.find('(') != string::npos || term.find(')') != string::npos) && i < 1000) {
+        evalInnerBracket(term);
+        i++;
+    }
+
+    return;
+}
+
+/*string evalMathFunctions(string term) {
     string bracketContent;
     string bracketResult;
     for(stringSizeType i = 0; i < term.size(); i++) {
@@ -370,7 +350,8 @@ string evalMathFunctions(string term) {
                             if(!isPartOfMathFunction(term[k])) {
                                 string mathFunction = term.substr(k+1, j-k-1);
                                 bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
-                                bracketResult = calcBracket("(" + bracketContent + ")"); // todo more parameter
+                                bracketResult = "(" + bracketContent + ")";
+                                evalInnerBracket(bracketResult); // todo: more parameters
 
                                 string newTerm = term.substr(0, k+1) + calcMathFunction(bracketResult, mathFunction);
                                 if(endIndex < term.size()-1) {
@@ -382,7 +363,8 @@ string evalMathFunctions(string term) {
                             if(k == 0) {
                                 string mathFunction = term.substr(0, j);
                                 bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
-                                bracketResult = calcBracket("(" + bracketContent + ")");
+                                bracketResult = "(" + bracketContent + ")";
+                                evalInnerBracket(bracketResult);
 
                                 string newTerm = calcMathFunction(bracketResult, mathFunction);
                                 if(endIndex < term.size()-1) {
@@ -397,7 +379,8 @@ string evalMathFunctions(string term) {
                         break;
                     } else {
                         bracketContent = term.substr(startIndex+1, endIndex-startIndex-1);
-                        bracketResult = calcBracket("(" + bracketContent + ")");
+                        bracketResult = "(" + bracketContent + ")";
+                        evalInnerBracket(bracketResult);
 
                         string newTerm = "";
                         if(startIndex != 0) {
@@ -417,13 +400,15 @@ string evalMathFunctions(string term) {
         }
     }
     return term;
-}
+}*/
 
 namespace Eval {
     double eval(string term) {
-        term = checkBrackets(term);
+        addMissingBrackets(term);
 
-        term = evalMathFunctions(term);
+        //term = evalMathFunctions(term);
+
+        evalBrackets(term);
 
         evalArithmeticOperators(term,0);
     
@@ -431,9 +416,7 @@ namespace Eval {
     }
 }
 /* TODO:
+    - Fix brackets
     - Fix issue with number*mathfunction
-    - Add more comments
-    - Make code more readable
-    - Use references in functions
     - Testing
 */
