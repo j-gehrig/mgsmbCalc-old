@@ -130,17 +130,17 @@ eval/fast:
 .PHONY : eval/fast
 
 #=============================================================================
-# Target rules for targets named Calculator
+# Target rules for targets named mgsmbCalc-Console
 
 # Build rule for target.
-Calculator: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Calculator
-.PHONY : Calculator
+mgsmbCalc-Console: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mgsmbCalc-Console
+.PHONY : mgsmbCalc-Console
 
 # fast build rule for target.
-Calculator/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/build
-.PHONY : Calculator/fast
+mgsmbCalc-Console/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mgsmbCalc-Console.dir/build.make CMakeFiles/mgsmbCalc-Console.dir/build
+.PHONY : mgsmbCalc-Console/fast
 
 src/eval.o: src/eval.cpp.o
 .PHONY : src/eval.o
@@ -171,7 +171,7 @@ src/mgsmbCalc.o: src/mgsmbCalc.cpp.o
 
 # target to build an object file
 src/mgsmbCalc.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/mgsmbCalc.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mgsmbCalc-Console.dir/build.make CMakeFiles/mgsmbCalc-Console.dir/src/mgsmbCalc.cpp.o
 .PHONY : src/mgsmbCalc.cpp.o
 
 src/mgsmbCalc.i: src/mgsmbCalc.cpp.i
@@ -179,7 +179,7 @@ src/mgsmbCalc.i: src/mgsmbCalc.cpp.i
 
 # target to preprocess a source file
 src/mgsmbCalc.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/mgsmbCalc.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mgsmbCalc-Console.dir/build.make CMakeFiles/mgsmbCalc-Console.dir/src/mgsmbCalc.cpp.i
 .PHONY : src/mgsmbCalc.cpp.i
 
 src/mgsmbCalc.s: src/mgsmbCalc.cpp.s
@@ -187,7 +187,7 @@ src/mgsmbCalc.s: src/mgsmbCalc.cpp.s
 
 # target to generate assembly for a file
 src/mgsmbCalc.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Calculator.dir/build.make CMakeFiles/Calculator.dir/src/mgsmbCalc.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mgsmbCalc-Console.dir/build.make CMakeFiles/mgsmbCalc-Console.dir/src/mgsmbCalc.cpp.s
 .PHONY : src/mgsmbCalc.cpp.s
 
 # Help Target
@@ -198,8 +198,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... Calculator"
 	@echo "... eval"
+	@echo "... mgsmbCalc-Console"
 	@echo "... src/eval.o"
 	@echo "... src/eval.i"
 	@echo "... src/eval.s"

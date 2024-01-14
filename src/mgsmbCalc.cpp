@@ -11,33 +11,30 @@ double round_up(double value, int decimal_places) {
 int main() {
     const int digits = 25;
 
-    std::string term;
     std::cout << " -- mgsmbCalc -- \n"
               << "C++ calculator made by Johannes Gehrig Riveros \n"
               << "https://github.com/j-gehrig\n\n";
 
     while(true) {
         std::cout << "Please enter the term, which is to be calculated:\n\n";
-        std::getline(std::cin, term);
-        const std::string input = term;
+        char input[1024];
+        std::cin >> input;
+        const char* term = input;
 
-        std::cout << "\nCalculating term \"" << input << "\"...\n";
+        std::cout << "\nCalculating term \"" << term << "\"...\n";
 
-        double ans;
-        if(term.size() > 2) { 
-            ans = round_up(Eval::eval(term), digits);
-        } else { // Has to be only a number; skips the evaluation functions
-            ans = std::atof(term.c_str());
-        }
+        double ans = round_up(Eval::eval(term), digits);
 
         std::cout << "answer: " << ans << "\n\nStop program? (y/N) ";
 
-        std::string response;
-        std::getline(std::cin, response);
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear buffer
+
+        char response;
+        std::cin.get(response);
 
         std::cout << "\n\n";
 
-        if(response == "y" || response == "Y") break;
+        if(response == 'y' || response == 'Y') break;
     }
     std::cout << std::endl;
     return 0;

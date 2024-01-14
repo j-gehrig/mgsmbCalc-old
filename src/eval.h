@@ -4,7 +4,7 @@
 #include <string>
 
 namespace Eval {
-    double eval(std::string term);
+    double eval(const char* term);
 };
 
 #endif

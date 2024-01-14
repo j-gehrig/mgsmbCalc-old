@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28.1)
-project("Calculator")
+project("mgsmbCalc")
 
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
@@ -12,5 +12,5 @@ target_link_libraries(eval math)
 set_target_properties(eval PROPERTIES PREFIX "lib")
 set_target_properties(eval PROPERTIES SUFFIX ".a")
 
-add_executable(Calculator ${CMAKE_SOURCE_DIR}/src/mgsmbCalc.cpp)
-target_link_libraries(Calculator eval)
+add_executable(mgsmbCalc-Console ${CMAKE_SOURCE_DIR}/src/mgsmbCalc.cpp)
+target_link_libraries(mgsmbCalc-Console eval)

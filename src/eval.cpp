@@ -352,7 +352,10 @@ void evalBrackets(string &term) {
 }
 
 namespace Eval {
-    double eval(string term) {
+    double eval(const char* termCharPtr) {
+        std::string term(termCharPtr);
+        if(term.size() < 2) return std::atof(term.c_str()); // Has to be only number
+
         if(term.find('(') != std::string::npos) {
             addMissingBrackets(term);
             evalBrackets(term);
