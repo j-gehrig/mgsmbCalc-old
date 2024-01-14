@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": false,
       "cwd": "/home/max/Server/C++/Calculator/src",
-      "program": "/home/max/Server/C++/Calculator/src/build/Debug/outDebug",
+      "program": "/home/max/Server/C++/Calculator/out/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
