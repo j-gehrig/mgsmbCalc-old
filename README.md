@@ -1,5 +1,7 @@
 # mgsmbCalc
 
+## Deprecated. Use [this repo](https://github.com/j-gehrig/mgsmbCalc/) instead.
+
 This is mainly an eval library, but I also made a tiny console program to use the library.<br>
 I chose to use my own [math library](https://github.com/j-gehrig/math), meaning the algorithms might not be as good as they could.<br>
 ##### Currently, functions are broken. I'll fix that very soon.<br>
